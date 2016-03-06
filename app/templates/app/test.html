@@ -92,8 +92,6 @@
                         <li> <b> Length </b> - The duration of the song.
                         <li> <b> Acoustic </b> - The higher the value the more
                         acoustic the song is.
-                        <li> <b> Popularity </b> - The higher the value the more
-                        popular the song is.
                     </ol>
 
                     <h2 class="text-center">FAQ</h2>
@@ -179,27 +177,7 @@
 
                             <a class="btn btn-primary btn-sm pull-left" id='pick'
                                 role="button">back</a>
-                        </div>
-                    </div>
-
-                    <div class="panel panel-default">
-                        <!-- <div class="panel-heading">Filter</div> -->
-                        <div class="panel-body">
-                            <div class="form-inline">
-                                <div class="form-group">
-                                    <label for="min-bpm">Minimum BPM</label>
-                                    <input id="min-bpm" type="number" class="form-control" placeholder="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="max-bpm">Maximum BPM</label>
-                                    <input id="max-bpm" type="number" class="form-control" placeholder="1000">
-                                </div>
-                                <div class="form-group">
-                                    <label for="include-double">Include Doubled BPM</label>
-                                    <input id="include-double" type="checkbox" checked="checked">
-                                </div>
-                                <!-- <button id="filter-button" class="btn btn-default btn-sm">Filter</button> -->
-                            </div>
+                            <a class="btn btn-primary btn-sm pull-left" id='mix' role="button">Mix</a>
                         </div>
                     </div>
 
@@ -216,7 +194,6 @@
                                 <th> Valence </th>
                                 <th> Length </th>
                                 <th> Acoustic </th>
-                                <th> Pop. </th>
                             </tr>
                         </thead>
                         <tbody> </tbody>
@@ -282,7 +259,7 @@ function authorizeUser() {
     var url = 'https://accounts.spotify.com/authorize?client_id=' + SPOTIFY_CLIENT_ID +
         '&response_type=token' +
         '&scope=' + encodeURIComponent(scopes) +
-        '&redirect_uri=' + encodeURI('http://mezclador.azurewebsites.net/test');
+        '&redirect_uri=' + encodeURI(SPOTIFY_REDIRECT_URI);
     document.location = url;
 }
 function parseArgs() {
@@ -350,6 +327,7 @@ function callSpotifyQ(type, url, json) {
         });  
     });
 }
+
 function getSpotify(url, data, callback) {
     $.ajax(url, {
         dataType: 'json',
@@ -409,14 +387,15 @@ function fetchSinglePlaylist(playlist) {
     $("#playlist-title").attr('href', playlist.uri);
     info("");
     fetchPlaylistTracks(playlist)
-    .then(function() {
-        saveState();
-        enableSaveButtonWhenNeeded();
-    })
-    .catch(function(msg) {
-        console.log('msg', msg);
-        error("Error while loading playlist: " + msg);
-    });
+    //Fuck save state right now
+    // .then(function() {
+    //     saveState();
+    //     enableSaveButtonWhenNeeded();
+    // // })
+    // .catch(function(msg) {
+    //     console.log('msg', msg);
+    //     error("Error while loading playlist: " + msg);
+    // });
 }
 function findDuplicates(playlist) {
     var ids = {};
@@ -442,9 +421,54 @@ function formatDuration(dur) {
     return mins + ":" + ssecs;
 }
 function fetchAudioFeatures(ids) {
-    var cids = ids.join(',');
-    var url = "https://api.spotify.com/v1/audio-features";
-    return getSpotifyQ(url, { ids: cids});
+    var url = 'http://developer.echonest.com/api/v4/track/profile?api_key=FFUEJWLF3RQQQP2K8&callback=?';
+    $.ajaxSetup({
+        scriptCharset: "utf-8",
+        contentType: "application/json",
+        charset:"ISO-8859-1"
+    });
+    var promises = [];
+    for(var i = 0; i <ids.length; i++){
+        var id = ids[i];
+        //TODO remove
+        //console.log('spotify-WW:track:'.concat(id));
+        promises.push($.getJSON(url, { id: 'spotify-WW:track:'.concat(id), format:'jsonp', bucket : 'audio_summary'}, function(data) {
+            }
+        ))
+    }
+    // Combine all promises
+    // and run a callback
+    return $.when.apply($, promises).then(function(){
+        var tracks = [];
+
+        // This callback will be passed the result of each AJAX call as a parameter
+        for(var i = 0; i < arguments.length; i++){
+            // arguments[i][0] is needed because each argument
+            // is an array of 3 elements.
+            // The data, the status, and the jqXHR object
+            //console.log(JSON.stringify(data, null, 4));
+            //console.log(JSON.stringify(data.response.track.audio_summary, null, 4));
+            var trackInfo = arguments[i][0].response.track;
+            var data = {
+                name: trackInfo.title,
+                artist: trackInfo.artist,
+                id: trackInfo.foreign_id.substring(14),
+                enInfo: {
+                    tempo: trackInfo.audio_summary.tempo,
+                    energy: trackInfo.audio_summary.energy,
+                    danceability: trackInfo.audio_summary.danceability,
+                    loudness: trackInfo.audio_summary.loudness,
+                    valence: trackInfo.audio_summary.valence,
+                    duration_s: trackInfo.audio_summary.duration,
+                    acousticness: trackInfo.audio_summary.acousticness,
+                }
+
+            }
+            tracks.push(data);
+        }
+        //TODO remove
+        return tracks;
+    });
 }
 function updateTable(tracks) {
     $("#single-playlist-contents").show();
@@ -466,10 +490,10 @@ function addTrack(table,track) {
                 Math.round(track.enInfo.danceability * 100),
                 Math.round(track.enInfo.loudness),
                 Math.round(track.enInfo.valence * 100),
-                formatDuration(Math.round(track.enInfo.duration_ms / 1000.0)),
+                formatDuration(Math.round(track.enInfo.duration_s)),
                 Math.round(track.enInfo.acousticness * 100),
                 //Math.round(track.enInfo.song_hotttnesss * 100),
-                Math.round(track.popularity),
+                //Math.round(track.popularity),
                 track
         ]);
     } else {
@@ -505,11 +529,14 @@ function fetchPlaylistTracks(playlist) {
                     }
                 }
             });
-            return fetchAudioFeatures(ids)
+            
+            return fetchAudioFeatures(ids).then(function(trackData){
+                return trackData;
+            });
         })
         .then(function(trackFeatures) {
             var fmap = {};
-            console.log('audio', trackFeatures);
+            console.log('audio', JSON.stringify(trackFeatures,null,4));
             // beta apis are funny like this ...
             if ('audio_attributes' in trackFeatures) {
                 trackFeatures = trackFeatures['audio_attributes']
@@ -526,13 +553,15 @@ function fetchPlaylistTracks(playlist) {
                 if (item.track && item.track.id) {
                     var tid = item.track.id;
                     if (tid in fmap) {
-                        item.track.enInfo = fmap[tid];
+                        item.track.enInfo = fmap[tid].enInfo;
+                        console.log(JSON.stringify(fmap[tid].enInfo, null, 4));
                     } else {
                         item.track.enInfo = {};
                     }
                 }
             });
             updateTable(tracks);
+            //TODO not necessary, remove?
             if (tracks.next) {
                 return fetchLoop(tracks.next);
             }
