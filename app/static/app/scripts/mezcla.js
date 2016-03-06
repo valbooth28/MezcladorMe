@@ -13,6 +13,7 @@ var cols = [
 var forceDisableSave = false;
 // state of the saved playlist, so save button is only shown when different
 var savedState = {};
+var allSongs;
 function error(msg) {
     info(msg);
 }
@@ -166,6 +167,18 @@ function fetchSinglePlaylist(playlist) {
     //     console.log('msg', msg);
     //     error("Error while loading playlist: " + msg);
     // });
+
+}
+function mix(){
+    //TODO remove
+    console.log("Got to the mix function!");
+    var graph = buildGraph(allSongs);
+    //console.log(JSON.stringify(graph, null, 4));
+    var newOrder = MST(graph, allSongs.length, allSongs);
+    var data = {
+        items: newOrder
+    }
+    updateTable(data);
 }
 function findDuplicates(playlist) {
     var ids = {};
@@ -223,6 +236,7 @@ function fetchAudioFeatures(ids) {
                 name: trackInfo.title,
                 artist: trackInfo.artist,
                 id: trackInfo.foreign_id.substring(14),
+                which: i,
                 enInfo: {
                     tempo: trackInfo.audio_summary.tempo,
                     energy: trackInfo.audio_summary.energy,
@@ -238,6 +252,7 @@ function fetchAudioFeatures(ids) {
         }
         //TODO remove
         return tracks;
+
     });
 }
 function updateTable(tracks) {
@@ -306,7 +321,7 @@ function fetchPlaylistTracks(playlist) {
         })
         .then(function(trackFeatures) {
             var fmap = {};
-            console.log('audio', JSON.stringify(trackFeatures,null,4));
+            //console.log('audio', JSON.stringify(trackFeatures,null,4));
             // beta apis are funny like this ...
             if ('audio_attributes' in trackFeatures) {
                 trackFeatures = trackFeatures['audio_attributes']
@@ -324,20 +339,23 @@ function fetchPlaylistTracks(playlist) {
                     var tid = item.track.id;
                     if (tid in fmap) {
                         item.track.enInfo = fmap[tid].enInfo;
-                        console.log(JSON.stringify(fmap[tid].enInfo, null, 4));
+                        //console.log(JSON.stringify(fmap[tid].enInfo, null, 4));
                     } else {
                         item.track.enInfo = {};
                     }
                 }
             });
             updateTable(tracks);
-            allSongsInfo = tracks;
+            allSongs = trackFeatures;
+            //TODO remove
+            //console.log(JSON.stringify(allSongs, null, 4));
             //TODO not necessary, remove?
             if (tracks.next) {
                 return fetchLoop(tracks.next);
             }
+
         })
-        console.log(JSON.stringify(curPlaylist, null, 4));
+        
     }
     // Spotify API defect? specifying limit will actually return up to 100 items anyway.
     var startUrl = "https://api.spotify.com/v1/users/" + playlist.owner.id +
@@ -395,6 +413,9 @@ function playlistLoaded(playlists) {
                 tr.append(tdOwner);
                 pl.append(tr);
             }
+        });
+        $("#mix").on('click', function(){
+            mix();
         });
         if (playlists.next) {
             getSpotify(playlists.next, null, playlistLoaded);
