@@ -178,6 +178,9 @@ function mix(){
     var data = {
         items: newOrder
     }
+    songTable.destroy();
+    $("#song-table").empty();
+    songTable = initTable();
     updateTable(data);
 }
 function findDuplicates(playlist) {
@@ -266,7 +269,7 @@ function updateTable(tracks) {
 }
 function addTrack(table,track) {
     if ('tempo' in track.enInfo) {
-        table.row.add([
+        var data = [
                 track.which + 1, 
                 track.name, 
                 track.artists[0].name,
@@ -280,7 +283,8 @@ function addTrack(table,track) {
                 //Math.round(track.enInfo.song_hotttnesss * 100),
                 //Math.round(track.popularity),
                 track
-        ]);
+        ];
+        table.row.add(data);
     } else {
         table.row.add([
                 track.which + 1, 

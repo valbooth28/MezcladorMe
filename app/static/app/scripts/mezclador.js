@@ -182,7 +182,7 @@ function buildPath(adjList, allSongs){
 	}
 	var parent= adjList[startNode][0];
 	pathIndices.push(startNode, parent);
-	path.push(toData(startNode,allSongs), toData(parent,allSongs));
+	path.push(toData(startNode,allSongs, 0), toData(parent,allSongs,1));
 	
 	var parentLst= adjList[parent];
 	var newParent;
@@ -192,7 +192,7 @@ function buildPath(adjList, allSongs){
 				newParent = parentLst[i];
 			}
 		}
-		path.push(toData(newParent,allSongs));
+		path.push(toData(newParent,allSongs,path.length));
 		pathIndices.push(newParent);
 		parentLst = adjList[newParent];
 		parent = newParent;
@@ -201,21 +201,23 @@ function buildPath(adjList, allSongs){
 	return path;
 }
 
-function toData(index, allSongs){
+function toData(index, allSongs, newIndex){
 	var trackInfo = allSongs[index];
 	var data = {
         name: trackInfo.name,
-        artists: [trackInfo.artist],
+        artists: [{
+        	name:trackInfo.artist}
+    	],
         id: trackInfo.id,
-        which: index,
+        which: newIndex,
         enInfo: {
-            tempo: trackInfo.tempo,
-            energy: trackInfo.energy,
-            danceability: trackInfo.danceability,
-            loudness: trackInfo.loudness,
-            valence: trackInfo.valence,
-            duration_s: trackInfo.duration,
-            acousticness: trackInfo.acousticness,
+            tempo: trackInfo.enInfo.tempo,
+            energy: trackInfo.enInfo.energy,
+            danceability: trackInfo.enInfo.danceability,
+            loudness: trackInfo.enInfo.loudness,
+            valence: trackInfo.enInfo.valence,
+            duration_s: trackInfo.enInfo.duration_s,
+            acousticness: trackInfo.enInfo.acousticness,
     	}
 	}
 	var track = {
