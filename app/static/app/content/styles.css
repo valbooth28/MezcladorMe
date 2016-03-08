@@ -26,7 +26,8 @@ body {
 }
 
 #main {
-    background-image: url(images/saxman.jpg);
+  /*Image courtesy of https://pixabay.com/en/users/Unsplash-242387/*/
+    background-image: url(../images/headphones.jpg);
 }   
 
 #playlists {
