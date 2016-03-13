@@ -53,9 +53,9 @@ function buildGraph(allSongs){
 	}());
 	for(var k=0; k<allSongs.length;k++){
 		for(var l=0; l<allSongs.length;l++){
-			if(l==k){
+			if((l==k) || (l<k)){
 				continue;
-			else{
+			}else{
 				var song1 = allSongs[k];
 				var song2 = allSongs[l];
 				var edge = heuristic(song1, song2);
