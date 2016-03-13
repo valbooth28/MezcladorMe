@@ -168,7 +168,7 @@ function buildPath(adjList, allSongs){
 	for(var prop in adjList){
 		if(adjList.hasOwnProperty(prop)){
 			if(adjList[prop].length == 1){
-				startNode = prop;
+				startNode = parseInt(prop);
 				break;
 			}
 		}
