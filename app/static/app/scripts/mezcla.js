@@ -175,9 +175,7 @@ function mix(){
     var data = {
         items: newOrder
     }
-    songTable.destroy();
-    $("#song-table").empty();
-    songTable = initTable();
+    songTable.clear();
     updateTable(data);
 }
 function findDuplicates(playlist) {
@@ -212,9 +210,7 @@ function fetchAudioFeatures(ids) {
     });
     var promises = [];
     for(var i = 0; i <ids.length; i++){
-        var id = ids[i];
-        //TODO remove
-        //console.log('spotify-WW:track:'.concat(id));
+        var id = ids[i];;
         promises.push($.getJSON(url, { id: 'spotify-WW:track:'.concat(id), format:'jsonp', bucket : 'audio_summary'}, function(data) {
             }
         ))
