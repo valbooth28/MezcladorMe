@@ -46,7 +46,6 @@ function buildGraph(allSongs){
 	           	}
 	        },
 	        remove: function() {
-	        	//console.log("removing from graph: " + JSON.stringify(this.nodes, null, 4));
 	        	return this.nodes.shift();
 	        }
     	};
@@ -56,7 +55,7 @@ function buildGraph(allSongs){
 		for(var l=0; l<allSongs.length;l++){
 			if(l==k){
 				continue;
-			}else{
+			else{
 				var song1 = allSongs[k];
 				var song2 = allSongs[l];
 				var edge = heuristic(song1, song2);
@@ -155,14 +154,8 @@ function MST(graph, songCount, allSongs){
 			cycleChecking[subTree1] = cycleChecking[subTree1].concat(cycleChecking[subTree2]);
 			cycleChecking.splice(subTree2, 1);
 		}
-		
-		console.log("treeSize: " + treeSize);
-		console.log("adjList: "+JSON.stringify(adjList, null, 4));
 		treeSize++;
 	}
-	//TODO remove
-	//console.log("adjList: "+JSON.stringify(adjList, null, 4));
-	//TODO return something
 	var results = buildPath(adjList, allSongs);
 	return results;
 }
@@ -197,7 +190,6 @@ function buildPath(adjList, allSongs){
 		parentLst = adjList[newParent];
 		parent = newParent;
 	}
-	console.log("PATH: " + JSON.stringify(path, null, 4));
 	return path;
 }
 

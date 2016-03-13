@@ -170,10 +170,7 @@ function fetchSinglePlaylist(playlist) {
 
 }
 function mix(){
-    //TODO remove
-    console.log("Got to the mix function!");
     var graph = buildGraph(allSongs);
-    //console.log(JSON.stringify(graph, null, 4));
     var newOrder = MST(graph, allSongs.length, allSongs);
     var data = {
         items: newOrder
@@ -253,7 +250,6 @@ function fetchAudioFeatures(ids) {
             }
             tracks.push(data);
         }
-        //TODO remove
         return tracks;
 
     });
@@ -351,9 +347,6 @@ function fetchPlaylistTracks(playlist) {
             });
             updateTable(tracks);
             allSongs = trackFeatures;
-            //TODO remove
-            //console.log(JSON.stringify(allSongs, null, 4));
-            //TODO not necessary, remove?
             if (tracks.next) {
                 return fetchLoop(tracks.next);
             }
