@@ -73,15 +73,15 @@
                     <h2 class="text-center">Tap into the power of The Echo Nest</h2>
                     <p>
                     <b> Mezclador </b> analyzes your playlist
-                    based on a number of Echo Nest song attributes including:
+                    based on a number of Echo Nest <a
+                        href="http://developer.echonest.com/acoustic-attributes.html">song attributes</a> including:
                     </p>
 
                     <ol>
                         <li> <b> Beats Per Minute (BPM)</b> - The tempo of the
                         song.
                         <li> <b> Energy</b> - The energy of a song - the higher
-                        the value, the more energtic.
-                        song
+                        the value, the more energtic the song.
                         <li> <b> Danceability</b> - The higher the value, the
                         easier it is to dance to this song.
                         <li> <b> Loudness </b> - The higher the value, the
@@ -93,42 +93,13 @@
                         acoustic the song is.
                     </ol>
 
-                    <!-- <h2 class="text-center">FAQ</h2> -->
-                    <!-- <p> -->
-                        <!-- Here are some answers to questions about <b> Sort Your
-                        Music </b>
-                    </p>
-                    <ol>
-                        <li> <b> How was this built? </b> This was created using
-                        the <a
-                        href="http://developer.spotify.com">Spotify</a> API.
-
-                        <li> <b> Where can I learn more about the Echo Nest song
-                        attributes?</b> See <a
-                        href="http://developer.echonest.com/acoustic-attributes.html">
-                        Acoustic Attributes Overview </a>
-                        <li> <b> Can you add more attributes to the app?  </b>
-                        Yes, but it is a tradeoff between display space,
-                        complexity and utility. Let me know which attributes
-                        you'd like to see.
-                        <li> <b> Any more features planned?</b> - Yes, I'd like
-                        to add a few more features such as:
-                            <ul>
-                                <li> Duplicate track removal
-                                <li> Manual reordering, addition, and deletion.
-                            </ul>
-                        If you have any ideas for new feature, let me know.
-                        <li> <b> Is the source available</b> - Yes, you can find
-                        it on <a href="https://github.com/plamere/SortYourMusic">github</a>
-                        <li> <b> Does Sort Your Music overwrite my playlist when
-                            I save?</b> - 
-                            No, it creates a copy of the playlist. The new
-                            playlist is called 'Old playlist name sorted by
-                            increasing X', where X is what you sorted the
-                            playlist on. Note that an older version of the app
-                            did overwrite your playlists, but some folks didn't
-                            like that.
-                    </ol> -->
+                    <h2 class="text-center"> About MezcladorMe </h2>
+                    <ul>
+                        <li> <b> Creator:</b> This was made by <span class="rit">RIT</span> student <a href="http://www.valbooth.com">Val Booth</a>, originally for <a href="http://brickhack.io">BrickHack 2</a>. It was based off of Paul Lamere's <a href="http://static.echonest.com/SortYourMusic/">Sort Your Music</a>. 
+                        <li> <b> Technologies:</b> This is a django app, running on Azure, using the <a
+                        href="http://developer.spotify.com">Spotify API</a> and <a href="http://developer.echonest.com/docs/v4">EchoNest API</a>. 
+                        <li> <b> Source:</b> This project is open sourced under the <a href="https://www.gnu.org/licenses/gpl.txt">GPL</a> on <a href="https://github.com/valbooth28/MezcladorMe">Github</a>.
+                        <li> <b>Song Analysis: </b> I currently determine "song similarity" by taking the difference of each pair of songs' tempo, danceability, loudness, valence, accousticness, and energy respectively, and then calculate a heuristic of: 7.5 * loudness difference + danceability difference + (15/17) * energy difference + (15/21) * accoustic difference + (15/24) * valence difference + (15/31) * tempo difference to normalize the values. I got those numbers from analyzing mixes I have made and sorted by ear in the past. If you think you have a better heuristic, feel free to make an issue on Github.
               </div> 
           </div>
         </div>
@@ -206,10 +177,8 @@
     <div id="footer">
       <div class="container text-center">
             <p class="text-muted">
-                Powered by <a href="http://spotify.com">Spotify</a>
-                Created by <a href="http://twitter.com/plamere">@plamere</a>
-                with contributions by <a href="http://twitter.com/sonneveld">@sonneveld</a>.
-                This file is protected by the GPL. View the license <a href="https://www.gnu.org/licenses/gpl.txt">here</a>, and the source repo <a href="https://github.com/valbooth28/MezcladorMe">here</a>.
+                Powered by <a href="http://spotify.com">Spotify</a> · Created by <a href="http://www.valbooth.com">Val Booth</a> · Based off of <a href="http://static.echonest.com/SortYourMusic/">Sort Your Music</a> · <a href="https://github.com/valbooth28/MezcladorMe">Open Source</a>
+                under the <a href="https://www.gnu.org/licenses/gpl.txt">GPL</a>
             </p>
       </div>
     </div>

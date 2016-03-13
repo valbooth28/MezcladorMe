@@ -17,6 +17,12 @@ body {
   height: 18px;
 }
 
+.rit {
+    color: #F36E21;
+    font-weight: 400;
+    text-decoration: none;
+}
+
 #footer p {
     font-size:12px;
 }
