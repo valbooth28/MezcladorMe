@@ -72,9 +72,8 @@
 
                     <h2 class="text-center">Tap into the power of The Echo Nest</h2>
                     <p>
-                    <b> Mezclador </b> analyzes your playlist
-                    based on a number of Echo Nest <a
-                        href="http://developer.echonest.com/acoustic-attributes.html">song attributes</a> including:
+                    <b> Mezclador </b> analyzes your playlist <a
+                        href="https://developer.spotify.com/web-api/get-audio-features/">song attributes</a> retrieved from Spotify, including:
                     </p>
 
                     <ol>
@@ -97,9 +96,10 @@
                     <ul>
                         <li> <b> Creator:</b> This was made by <span class="rit">RIT</span> student <a href="http://www.valbooth.com">Val Booth</a>, originally for <a href="http://brickhack.io">BrickHack 2</a>. It was based off of Paul Lamere's <a href="http://static.echonest.com/SortYourMusic/">Sort Your Music</a>. 
                         <li> <b> Technologies:</b> This is a django app, running on Azure, using the <a
-                        href="http://developer.spotify.com">Spotify API</a> and <a href="http://developer.echonest.com/docs/v4">EchoNest API</a>. 
+                        href="http://developer.spotify.com">Spotify API</a>.
                         <li> <b> Source:</b> This project is open sourced under the <a href="https://www.gnu.org/licenses/gpl.txt">GPL</a> on <a href="https://github.com/valbooth28/MezcladorMe">Github</a>.
-                        <li> <b>Song Analysis: </b> I currently determine "song similarity" by taking the difference of each pair of songs' tempo, danceability, loudness, valence, accousticness, and energy respectively, and then calculate a heuristic of: 7.5 * loudness difference + danceability difference + (15/17) * energy difference + (15/21) * accoustic difference + (15/24) * valence difference + (15/31) * tempo difference to normalize the values. I got those numbers from analyzing mixes I have made and sorted by ear in the past. If you think you have a better heuristic, feel free to make an issue on Github.
+                        <!-- Removing until I find a way to dynamically display these -->
+                <!--         <li> <b>Song Analysis: </b> I currently determine "song similarity" by taking the difference of each pair of songs' tempo, danceability, loudness, valence, accousticness, and energy respectively, and then calculate a heuristic of: 7.5 * loudness difference + danceability difference + (15/17) * energy difference + (15/21) * accoustic difference + (15/24) * valence difference + (15/31) * tempo difference to normalize the values. I got those numbers from analyzing mixes I have made and sorted by ear in the past. If you think you have a better heuristic, feel free to make an issue on Github. -->
               </div> 
           </div>
         </div>

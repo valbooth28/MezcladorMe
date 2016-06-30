@@ -2,6 +2,7 @@
 var accessToken = null;
 var curUserID = null;
 var curPlaylist = null;
+var albumDates = {};
 var audio = $("<audio>");
 var songTable;
 var cols = [
@@ -32,6 +33,20 @@ function authorizeUser() {
         '&scope=' + encodeURIComponent(scopes) +
         '&redirect_uri=' + encodeURI(SPOTIFY_REDIRECT_URI);
     document.location = url;
+}
+function fetchAlbums(ids) {
+    var cids = ids.join(',');
+    var url = "https://api.spotify.com/v1/albums";
+    return getSpotifyQ(url, { ids: cids});
+}
+function fetchAllAlbums(ids) {
+    var maxAlbumsPerCall = 20;
+    var qs = [];
+    for (var i = 0; i < ids.length; i += maxAlbumsPerCall) {
+        var aids = ids.slice(i, i + maxAlbumsPerCall);
+        qs.push(fetchAlbums(aids));
+    }
+    return Q.all(qs);
 }
 function parseArgs() {
     var hash = location.hash.replace(/#/g, '');
@@ -80,7 +95,6 @@ function callSpotifyQ(type, url, json) {
                 'Content-Type': 'application/json'
             },
             beforeSend : function () {
-                console.log(type + ": " + this.url);
             },
             success: function(data) {
                 resolve(data);
@@ -123,7 +137,6 @@ function getSpotifyQ(url, data) {
                 'Authorization': 'Bearer ' + accessToken
             },
             beforeSend : function () {
-                // console.log("GET: " + this.url);
             },
             success: function(data) {
                 resolve(data);
@@ -164,7 +177,6 @@ function fetchSinglePlaylist(playlist) {
     //     enableSaveButtonWhenNeeded();
     // // })
     // .catch(function(msg) {
-    //     console.log('msg', msg);
     //     error("Error while loading playlist: " + msg);
     // });
 
@@ -201,54 +213,59 @@ function formatDuration(dur) {
     }
     return mins + ":" + ssecs;
 }
+// function fetchAudioFeatures(ids) {
+//     var url = 'https://developer.spotify.com/web-api/get-audio-features/';
+//     $.ajaxSetup({
+//         scriptCharset: "utf-8",
+//         contentType: "application/json",
+//         charset:"ISO-8859-1",
+//         //headers: {"Authorization": "Bearer " + SPOTIFY_CLIENT_ID}
+//     });
+//     var promises = [];
+//     for(var i = 0; i <ids.length; i++){
+//         var id = ids[i];;
+//         promises.push($.getJSON(url, { id: 'spotify-WW:track:'.concat(id), format:'jsonp', bucket : 'audio_summary'}, function(data) {
+//         	return data;
+//         }
+//         ))
+//     }
+//     // Combine all promises
+//     // and run a callback
+//     return $.when.apply($, promises).then(function(){
+//         var tracks = [];
+
+//         // This callback will be passed the result of each AJAX call as a parameter
+//         for(var i = 0; i < arguments.length; i++){
+//             // arguments[i][0] is needed because each argument
+//             // is an array of 3 elements.
+//             // The data, the status, and the jqXHR object
+//             var trackInfo = arguments[i][0].response.track;
+//             var data = {
+//                 name: trackInfo.title,
+//                 artist: trackInfo.artist,
+//                 id: trackInfo.foreign_id.substring(14),
+//                 which: i,
+//                 enInfo: {
+//                     tempo: trackInfo.audio_summary.tempo,
+//                     energy: trackInfo.audio_summary.energy,
+//                     danceability: trackInfo.audio_summary.danceability,
+//                     loudness: trackInfo.audio_summary.loudness,
+//                     valence: trackInfo.audio_summary.valence,
+//                     duration_s: trackInfo.audio_summary.duration,
+//                     acousticness: trackInfo.audio_summary.acousticness,
+//                 }
+
+//             }
+//             tracks.push(data);
+//         }
+//         return tracks;
+
+//     });
+// }
 function fetchAudioFeatures(ids) {
-    var url = 'http://developer.echonest.com/api/v4/track/profile?api_key=FFUEJWLF3RQQQP2K8&callback=?';
-    $.ajaxSetup({
-        scriptCharset: "utf-8",
-        contentType: "application/json",
-        charset:"ISO-8859-1"
-    });
-    var promises = [];
-    for(var i = 0; i <ids.length; i++){
-        var id = ids[i];;
-        promises.push($.getJSON(url, { id: 'spotify-WW:track:'.concat(id), format:'jsonp', bucket : 'audio_summary'}, function(data) {
-            }
-        ))
-    }
-    // Combine all promises
-    // and run a callback
-    return $.when.apply($, promises).then(function(){
-        var tracks = [];
-
-        // This callback will be passed the result of each AJAX call as a parameter
-        for(var i = 0; i < arguments.length; i++){
-            // arguments[i][0] is needed because each argument
-            // is an array of 3 elements.
-            // The data, the status, and the jqXHR object
-            //console.log(JSON.stringify(data, null, 4));
-            //console.log(JSON.stringify(data.response.track.audio_summary, null, 4));
-            var trackInfo = arguments[i][0].response.track;
-            var data = {
-                name: trackInfo.title,
-                artist: trackInfo.artist,
-                id: trackInfo.foreign_id.substring(14),
-                which: i,
-                enInfo: {
-                    tempo: trackInfo.audio_summary.tempo,
-                    energy: trackInfo.audio_summary.energy,
-                    danceability: trackInfo.audio_summary.danceability,
-                    loudness: trackInfo.audio_summary.loudness,
-                    valence: trackInfo.audio_summary.valence,
-                    duration_s: trackInfo.audio_summary.duration,
-                    acousticness: trackInfo.audio_summary.acousticness,
-                }
-
-            }
-            tracks.push(data);
-        }
-        return tracks;
-
-    });
+    var cids = ids.join(',');
+    var url = "https://api.spotify.com/v1/audio-features/";
+    return getSpotifyQ(url, { ids: cids});
 }
 function updateTable(tracks) {
     $("#single-playlist-contents").show();
@@ -270,7 +287,7 @@ function addTrack(table,track) {
                 Math.round(track.enInfo.danceability * 100),
                 Math.round(track.enInfo.loudness),
                 Math.round(track.enInfo.valence * 100),
-                formatDuration(Math.round(track.enInfo.duration_s)),
+                formatDuration(Math.round(track.enInfo.duration_ms/1000)),
                 Math.round(track.enInfo.acousticness * 100),
                 //Math.round(track.enInfo.song_hotttnesss * 100),
                 //Math.round(track.popularity),
@@ -294,30 +311,103 @@ function addTrack(table,track) {
         ]);
     }
 }
+// function fetchPlaylistTracks(playlist) {
+//     function fetchLoop(url) {
+//         var tracks;
+//         return getSpotifyQ(url)
+//         .then(function(data) {
+//             var ids = [];
+//             tracks = data.tracks ? data.tracks : data;
+//             _.each(tracks.items, function(item, i) {
+//                 if (item.track) {
+//                     item.track.which = curPlaylist.tracks.items.length;
+//                     curPlaylist.tracks.items.push(item);
+//                     if (item.track && item.track.id) {
+//                         ids.push(item.track.id);
+//                     }
+//                 }
+//             });
+            
+//             return fetchAudioFeatures(ids).then(function(trackData){
+//             	cosole.log("Hello world?");
+//                 return trackData;
+//             });
+//         })
+//         .then(function(trackFeatures) {
+//             var fmap = {};
+//             // beta apis are funny like this ...
+//             if ('audio_attributes' in trackFeatures) {
+//                 trackFeatures = trackFeatures['audio_attributes']
+//             }
+//             if ('audio_features' in trackFeatures) {
+//                 trackFeatures = trackFeatures['audio_features']
+//             }
+//             _.each(trackFeatures, function(trackFeature, i) {
+//                 if (trackFeature && trackFeature.id) {
+//                     fmap[trackFeature.id] = trackFeature;
+//                 }
+//             });
+//             _.each(tracks.items, function(item, i) {
+//                 if (item.track && item.track.id) {
+//                     var tid = item.track.id;
+//                     if (tid in fmap) {
+//                         item.track.enInfo = fmap[tid].enInfo;
+//                     } else {
+//                         item.track.enInfo = {};
+//                     }
+//                 }
+//             });
+//             updateTable(tracks);
+//             allSongs = trackFeatures;
+//             if (tracks.next) {
+//                 return fetchLoop(tracks.next);
+//             }
+
+//         })
+        
+//     }
+//     // Spotify API defect? specifying limit will actually return up to 100 items anyway.
+//     var startUrl = "https://api.spotify.com/v1/users/" + playlist.owner.id +
+//         "/playlists/" + playlist.id + "/tracks?limit=50";
+//     return fetchLoop(startUrl);
+// }
 function fetchPlaylistTracks(playlist) {
     function fetchLoop(url) {
         var tracks;
         return getSpotifyQ(url)
         .then(function(data) {
+
             var ids = [];
+            var aids = [];
             tracks = data.tracks ? data.tracks : data;
             _.each(tracks.items, function(item, i) {
                 if (item.track) {
                     item.track.which = curPlaylist.tracks.items.length;
                     curPlaylist.tracks.items.push(item);
-                    if (item.track && item.track.id) {
-                        ids.push(item.track.id);
+                    if (!item.is_local) {
+                        if (item.track && item.track.id) {
+                            ids.push(item.track.id);
+                        }
+                        if (!(_.contains(aids, item.track.album.id))) {
+                            if (!(item.track.album.id in albumDates)) {
+                                aids.push(item.track.album.id);
+                            }
+                        }
                     }
+                } else {
                 }
             });
-            
-            return fetchAudioFeatures(ids).then(function(trackData){
-                return trackData;
-            });
+            return Q.all([fetchAllAlbums(aids), fetchAudioFeatures(ids)]);
         })
-        .then(function(trackFeatures) {
+        .then(function(results) {
+            var allAlbums = results[0];
+            var trackFeatures = results[1];
+            _.each(allAlbums, function(albums) {
+                _.each(albums.albums, function(album) {
+                    albumDates[album.id] = album.release_date;
+                });
+            });
             var fmap = {};
-            //console.log('audio', JSON.stringify(trackFeatures,null,4));
             // beta apis are funny like this ...
             if ('audio_attributes' in trackFeatures) {
                 trackFeatures = trackFeatures['audio_attributes']
@@ -334,19 +424,17 @@ function fetchPlaylistTracks(playlist) {
                 if (item.track && item.track.id) {
                     var tid = item.track.id;
                     if (tid in fmap) {
-                        item.track.enInfo = fmap[tid].enInfo;
-                        //console.log(JSON.stringify(fmap[tid].enInfo, null, 4));
+                        item.track.enInfo = fmap[tid];
                     } else {
                         item.track.enInfo = {};
                     }
                 }
             });
+            allSongs = _.pluck(tracks.items, 'track');
             updateTable(tracks);
-            allSongs = trackFeatures;
             if (tracks.next) {
                 return fetchLoop(tracks.next);
             }
-
         })
         
     }
