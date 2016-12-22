@@ -1,6 +1,15 @@
 "use strict";
 
-function heuristic(song1, song2){
+//heuristic constants
+var LOUDNESS_FAC = 1.1;
+var DANCE_FAC = 1;
+var ENERGY_FAC = (15/17);
+//has been 15/21 in the past
+var ACCOUSTIC_FAC = (15/17);
+var VAL_FAC = (15/24);
+var TEMPO_FAC = (15/31);
+
+function heuristic(song1, song2, print){
 	var tempo1 = parseFloat(song1.enInfo.tempo);
 	var tempo2 = parseFloat(song2.enInfo.tempo)
     var tempDiff = Math.abs(tempo1-tempo2);
@@ -10,7 +19,17 @@ function heuristic(song1, song2){
     var acoustDiff = Math.abs((parseFloat(song1.enInfo.acousticness*100)) - (parseFloat(song2.enInfo.acousticness*100)));
     var energyDiff = Math.abs((parseFloat(song1.enInfo.energy*100))-(parseFloat(song2.enInfo.energy)*100));
     //Based off of my mix test data. Not sure if this math makes sense
-    var result =7.5*loudDiff+danceDiff+(15/17)*energyDiff+(15/21)*acoustDiff+(15/24)*valDiff+(15/31)*tempDiff;
+    if(print){
+    	console.log("tempDiff = ", tempDiff );
+    	console.log("danceDiff = ", danceDiff );
+    	console.log("loudDiff = ", loudDiff );
+    	console.log("valDiff = ", valDiff );
+    	console.log("acoustDiff = ", acoustDiff);
+    	console.log("energyDiff = ", energyDiff);
+    	console.log("\n");
+    }
+    //was 15/21 accoustic
+    var result =LOUDNESS_FAC*loudDiff+DANCE_FAC*danceDiff+ENERGY_FAC*energyDiff+ACCOUSTIC_FAC*acoustDiff+VAL_FAC*valDiff+TEMPO_FAC*tempDiff;
     return result;
 }   
 
@@ -58,7 +77,7 @@ function buildGraph(allSongs){
 			}else{
 				var song1 = allSongs[k];
 				var song2 = allSongs[l];
-				var edge = heuristic(song1, song2);
+				var edge = heuristic(song1, song2, false);
 				var newNode = [];
 				newNode.push(edge, k,l);
 			}
@@ -112,6 +131,12 @@ function MST(graph, songCount, allSongs){
 		}else{
 			adjList[vertex2].push(vertex1);
 		}
+		//For testing purposes only, fine tuning heuristic
+		console.log("NEW EDGE: ")
+		console.log(JSON.stringify(allSongs[vertex1].name, null, 4));
+		console.log(JSON.stringify(allSongs[vertex2].name, null, 4));
+		console.log("w/heuristic: " + nextNode[0]);
+		heuristic(allSongs[vertex1], allSongs[vertex2], true)
 		vert1EdgeCount+=1;
 		vert2EdgeCount+=1;
 		edgeCount[vertex1] = vert1EdgeCount;
@@ -197,20 +222,10 @@ function toData(index, allSongs, newIndex){
 	var trackInfo = allSongs[index];
 	var data = {
         name: trackInfo.name,
-        artists: [{
-        	name:trackInfo.artist}
-    	],
+        artists: trackInfo.artists,
         id: trackInfo.id,
         which: newIndex,
-        enInfo: {
-            tempo: trackInfo.enInfo.tempo,
-            energy: trackInfo.enInfo.energy,
-            danceability: trackInfo.enInfo.danceability,
-            loudness: trackInfo.enInfo.loudness,
-            valence: trackInfo.enInfo.valence,
-            duration_s: trackInfo.enInfo.duration_s,
-            acousticness: trackInfo.enInfo.acousticness,
-    	}
+        enInfo: trackInfo.enInfo
 	}
 	var track = {
 		track: data
