@@ -1,3 +1,22 @@
+/* Custom CSS*/
+@import url('https://fonts.googleapis.com/css?family=Lobster');
+
+.title-text {
+  font-family: Lobster, cursive;
+  font-size: 32px;
+  float: left;
+  margin-top: 25px;
+  margin-bottom: 20px;
+}
+
+.rit {
+    color: #F36E21;
+    font-weight: 400;
+    text-decoration: none;
+}
+
+
+/* CSS Taken from pLamere's code: */
 /* Sticky footer styles */
 html {
   position: relative;
@@ -17,11 +36,7 @@ body {
   height: 18px;
 }
 
-.rit {
-    color: #F36E21;
-    font-weight: 400;
-    text-decoration: none;
-}
+
 
 #footer p {
     font-size:12px;

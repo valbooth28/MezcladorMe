@@ -5,7 +5,9 @@ Django settings for DjangoWebProject project.
 from os import path
 PROJECT_ROOT = path.dirname(path.abspath(path.dirname(__file__)))
 
-DEBUG = True
+#DEBUG = True so it handles static files for me during local dev.
+#DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ALLOWED_HOSTS = (
